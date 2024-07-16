@@ -79,3 +79,17 @@ na czas odczytu.
 * niepotrzebne indexy
 * zapytania bez indeksu
 * Dane do których sięgamy razem ale przechowujemy w osobnych kolekcjach
+
+## Connecting to MongoDB
+### Domyślny port mongoDb to 27017
+### MongoShell można uzywać JS
+#### Otrzymywanie connection string w mongosh:
+```mongodb-json
+atlas clusters connectionStrings describe myAtlasClusterEDU
+```
+#### Łączenie się z bazą:
+```mongodb-json
+mongosh -u myAtlasDBUser -p myatlas-001 YOUR_CONNECTION_STRING
+```
+### MongoDB Compass to GUI do bazy
+### Pamiętać aby sprawdzić czy ip jest na liście dozwolonych
