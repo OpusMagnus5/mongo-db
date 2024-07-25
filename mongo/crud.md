@@ -200,3 +200,82 @@ Ostatnie pole (options) jest Opcjonalne. Filter to argument który rozróżnia d
 do podmiany. Najlepiej podawać unikalne id, bo jeśli podamy bardziej zwyczajne pole
 to po prostu podmienimy pierwszy który znajdzie./
 Upsert w opcjach jeśli jest true i nie znajdzie dokumentu z filtra to tworzy nowy.
+
+### Update and return a Single Document
+
+Updates a single document based on the filter and sort criteria. Returns the original document by default. 
+Returns the updated document if returnNewDocument is set to true or returnDocument is set to after.
+```
+db.collection.findOneAndUpdate(
+    <filter>,
+    <update document or aggregation pipeline>,
+    {
+      writeConcern: <document>,
+      projection: <document>,
+      sort: <document>,
+      maxTimeMS: <number>,
+      upsert: <boolean>,
+      returnDocument: <string>,
+      returnNewDocument: <boolean>,
+      collation: <document>,
+      arrayFilters: [ <filterdocument1>, ... ]
+    }
+)
+```
+
+```mongodb-json
+db.grades.findOneAndUpdate(
+   { "name" : "R. Stiles" },
+   { $inc: { "points" : 5 } }
+)
+```
+
+### Update Multiple Documents
+
+Updates all documents that match the specified filter for a collection.
+Jeśli update się nie powiedzie część kolekcji zostanie zaktualizowanie, nie posiada
+rollbacku. Zmiany będą widoczne po ich wykonaniu co może nie być dobre gdy polegamy na 
+transakcjach.
+```
+db.collection.updateMany(
+   <filter>,
+   <update>,
+   {
+     upsert: <boolean>,
+     writeConcern: <document>,
+     collation: <document>,
+     arrayFilters: [ <filterdocument1>, ... ],
+     hint:  <document|string>,
+     let: <document>
+   }
+)
+```
+
+## Delete Documents
+
+### Delete All Documents
+
+Removes all documents that match the filter from a collection.
+```mongodb-json
+db.collection.deleteMany(
+   <filter>,
+   {
+      writeConcern: <document>,
+      collation: <document>
+   }
+)
+```
+
+### Delete Only One Document
+
+Removes a single document from a collection.
+```
+db.collection.deleteOne(
+    <filter>,
+    {
+      writeConcern: <document>,
+      collation: <document>,
+      hint: <document|string>
+    }
+)
+```
