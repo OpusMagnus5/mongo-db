@@ -6,8 +6,10 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertManyResult;
 import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.BsonObjectId;
 import org.bson.BsonValue;
 import org.bson.Document;
@@ -25,6 +27,8 @@ import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Updates.inc;
+import static com.mongodb.client.model.Updates.set;
 
 public class Main {
 
@@ -95,5 +99,18 @@ public class Main {
         Bson filters = Filters.and(gte("balance", 1000), eq("account_type", "checking"));
         Document document = collection.find(filters).first();
         String json = document.toJson();
+    }
+
+    private static void updateOne() {
+        Bson accountIdFilter = eq("account_id", 12345);
+        Bson updates = Updates.combine(set("account_status", "active"), inc("balance", 100));
+        UpdateResult result = collection.updateOne(accountIdFilter, updates);
+        result.getModifiedCount();
+    }
+
+    private static void updateMany() {
+        Bson accountIdFilter = eq("account_id", 12345);
+        Bson updates = Updates.combine(set("account_status", "active"));
+        UpdateResult result = collection.updateMany(accountIdFilter, updates);
     }
 }
