@@ -4,15 +4,14 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.InsertManyResult;
 import com.mongodb.client.result.InsertOneResult;
 import org.bson.BsonObjectId;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
@@ -23,6 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
 
 public class Main {
 
@@ -79,5 +81,19 @@ public class Main {
         InsertManyResult insertManyResult = collection.insertMany(documents);
         List<BsonValue> ids = insertManyResult.getInsertedIds().values().stream().toList();
         BsonObjectId objectId = ids.getFirst().asObjectId();
+    }
+
+    // szukanie dokumentów po filtrze
+    private static void findWithFilter() {
+        Bson filters = Filters.and(gte("balance", 1000), eq("account_type", "checking"));
+        FindIterable<Document> documents = collection.find(filters);
+        String json = documents.first().toJson();
+    }
+
+    // zwracanie pierwszego spełniającego filtr
+    private static void findFirstWithFilter() {
+        Bson filters = Filters.and(gte("balance", 1000), eq("account_type", "checking"));
+        Document document = collection.find(filters).first();
+        String json = document.toJson();
     }
 }
