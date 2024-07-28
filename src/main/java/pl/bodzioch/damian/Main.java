@@ -7,6 +7,7 @@ import com.mongodb.ServerApiVersion;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertManyResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
@@ -112,5 +113,17 @@ public class Main {
         Bson accountIdFilter = eq("account_id", 12345);
         Bson updates = Updates.combine(set("account_status", "active"));
         UpdateResult result = collection.updateMany(accountIdFilter, updates);
+    }
+
+    private static void deleteOne() {
+        Bson query = eq("account_id", 12345);
+        DeleteResult result = collection.deleteOne(query);
+        result.getDeletedCount();
+    }
+
+    private static void deleteMany() {
+        Bson query = eq("account_id", 12345);
+        DeleteResult result = collection.deleteMany(query);
+        result.getDeletedCount();
     }
 }
