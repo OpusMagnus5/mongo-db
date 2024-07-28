@@ -34,6 +34,7 @@ import static com.mongodb.client.model.Updates.set;
 public class Main {
 
     static MongoClient mongoClient = createMongoClient();
+    static ClientSession session = mongoClient.startSession();
     static MongoCollection<Document> collection = getCollection();
 
     public static void main(String[] args) {
@@ -125,5 +126,27 @@ public class Main {
         Bson query = eq("account_id", 12345);
         DeleteResult result = collection.deleteMany(query);
         result.getDeletedCount();
+    }
+
+    private static void transaction() {
+        TransactionBody<String> transaction = () -> {
+            Bson query1 = eq("account_id", 12345);
+            Bson update1 = Updates.combine(set("account_status", "active"), inc("balance", 100));
+
+            Bson query2 = eq("account_id", 33333);
+            Bson update2 = Updates.combine(set("account_status", "active"), inc("balance", 200));
+
+            collection.updateOne(session, query1, update1);
+            collection.updateOne(session, query2, update2);
+            return "Completed";
+        };
+
+        try {
+            session.withTransaction(transaction);
+        } catch (Exception e) {
+            System.out.println(e);
+        } finally {
+            session.close();
+        }
     }
 }
