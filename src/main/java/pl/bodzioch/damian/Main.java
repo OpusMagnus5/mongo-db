@@ -5,8 +5,7 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.*;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertManyResult;
 import com.mongodb.client.result.InsertOneResult;
@@ -19,17 +18,18 @@ import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.mongodb.client.model.Accumulators.avg;
+import static com.mongodb.client.model.Accumulators.sum;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Sorts.descending;
 import static com.mongodb.client.model.Updates.inc;
 import static com.mongodb.client.model.Updates.set;
+import static java.util.Arrays.asList;
 
 public class Main {
 
@@ -148,5 +148,21 @@ public class Main {
         } finally {
             session.close();
         }
+    }
+
+    private static void aggregation() {
+        // $match stage
+        Bson matchStage = Aggregates.match(Filters.eq("account_id", "MDB310054629"));
+        collection.aggregate(List.of(matchStage)).forEach(document->System.out.print(document.toJson()));
+
+        // $match and $group stage
+        Bson groupStage = Aggregates.group("$account_type", sum("total_balance", "$balance"), avg("average_balance", "$balance"));
+        collection.aggregate(List.of(matchStage, groupStage)).forEach(document->System.out.print(document.toJson()));
+
+        // $sort and $project stages
+        Bson sortStage = Aggregates.sort(Sorts.orderBy(descending("balance")));
+        Bson projectStage = Aggregates.project(Projections.fields(Projections.include("account_id", "account_type", "balance"), Projections.computed("euro_balance", new Document("$divide", asList("$balance", 1.20F))), Projections.excludeId()));
+        collection.aggregate(List.of(matchStage, sortStage, projectStage)).forEach(document->System.out.print(document.toJson()));
+
     }
 }
